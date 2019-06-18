@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Librerías para el DataTable -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+	<!-- Fuentes de Texto -->
+	<link href="https://fonts.googleapis.com/css?family=Noto+Serif+KR" rel="stylesheet">
+	<style>
+	body {font-family: 'Noto Serif KR', sans-serif;}
+</style>
+
+<title>
+	Daniel Beltrán Penagos - Taller No.9 
+</title>
+
+<script type="text/javascript">
+
+	pData = [
+	[3.9, 1.8, 'Hombre'],
+	[4.0, 2.3, 'Hombre'],
+	[3.8, 2.3, 'Hombre'],
+	[3.9, 2.5, 'Hombre'],
+	[2.9, 1.3, 'Hombre'],
+	[3.2, 1.7, 'Hombre'],
+	[4.6, 3.4, 'Hombre'],
+	[4.3, 3.1, 'Hombre'],
+	[3.1, 1.8, 'Hombre'],
+	[2.7, 1.5, 'Hombre'],
+	[2.3, 1.4, 'Hombre'],
+	[2.5, 2.1, 'Mujer'],
+	[1.6, 1.1, 'Mujer'],
+	[3.9, 3.9, 'Mujer'],
+	[3.4, 3.6, 'Mujer'],
+	[2.3, 2.5, 'Mujer'],
+	[1.6, 1.7, 'Mujer'],
+	[2.5, 2.9, 'Mujer'],
+	[3.4, 4.0, 'Mujer'],
+	[1.6, 1.9, 'Mujer'],
+	[2.0, 2.7, 'Mujer'],
+	[1.8, 3.6, 'Mujer'] 
+	];
+
+	$(document).ready(function() 
+	{
+		$('#datos').DataTable( {
+			data: pData,
+			columns: [
+			{ title: "Andrógeno" },
+			{ title: "Estrógeno" },
+			{ title: "Género" }
+			]
+		} );
+	} );
+
+	//-------------------------------RNA----------------------------------------------
+
+		/*
+		* Pesos generados aleatoriamente entre 0 y 5
+		* W1, W2, Wo
+		*/
+		var w1 = parseFloat((Math.random() * (5 - 0) + 0).toFixed(4));
+		var w2 = parseFloat((Math.random() * (5 - 0) + 0).toFixed(4));
+		var w0 = parseFloat((Math.random() * (5 - 0) + 0).toFixed(4));
+
+		/*
+		* Umbral
+		*/
+		var umbral = 0.5;
+
+		/*
+		* Factor de Aprendizaje
+		*/
+		var fAprendizaje = 0.2;
+
+		console.log("Pesos Iniciales:", [w1,w2,w0]);
+		console.log("Umbral para la red:", umbral);
+		console.log("Factor de Aprendizaje para la red", fAprendizaje);
+
+		/*
+		 * Siendo 1 para Hombre y 0 para Mujer
+		 * x = Andrógeno, y = Estrógeno, z = Género
+		 */ 
+		 casos = [
+		 [3.9, 1.8, 1],
+		 [4.0, 2.3, 1],
+		 [3.8, 2.3, 1],
+		 [3.9, 2.5, 1],
+		 [2.9, 1.3, 1],
+		 [3.2, 1.7, 1],
+		 [4.6, 3.4, 1],
+		 [4.3, 3.1, 1],
+		 [3.1, 1.8, 1],
+		 [2.7, 1.5, 1],
+		 [2.3, 1.4, 1],
+		 [2.5, 2.1, 0],
+		 [1.6, 1.1, 0],
+		 [3.9, 3.9, 0],
+		 [3.4, 3.6, 0],
+		 [2.3, 2.5, 0],
+		 [1.6, 1.7, 0],
+		 [2.5, 2.9, 0],
+		 [3.4, 4.0, 0],
+		 [1.6, 1.9, 0],
+		 [2.0, 2.7, 0],
+		 [1.8, 3.6, 0] 
+		 ];
+
+		 /**
+		 * Entrenar la RNA para que sus pesos sean los correspondidos
+		 * Se realiza la interación completa y se corrige sobre esa, no sobre el caso
+		 */
+		 function entrenar()
+		 {
+		 	console.log("Pesos antes de entrenar:", [w1,w2,w0]);
+		 	j = 0;
+
+		 	while(true)
+		 	{
+		 		final = true;
+		 		i     = 0;
+
+		 		console.log("Interación " + j);
+
+		 		while(i < casos.length)
+		 		{
+		 			console.log("Caso " + i + ":");
+
+		 			caso  = casos[i];
+		 			wx    = sumaProductoPesos(caso);
+		 			f     = activacion(wx);
+		 			err   = error(caso[2], f);
+
+		 			console.log("[Entrada1, Entrada2, Resultado Esperado]", caso);
+		 			console.log("wx: ", wx);
+		 			console.log("Resultado activación: ", f);
+		 			console.log("Error: ", err);
+
+		 			if(err != 0)
+		 			{ 
+		 				recalcularPesos(err, caso);
+		 				final = false;
+
+		 				console.log("Recalculo de pesos:", [w1,w2,w0])
+		 			}
+
+		 			i++;
+		 		}
+
+		 		if(final == true)
+		 		{
+		 			break;
+		 		}
+
+		 		j++;
+		 	}
+
+		 	console.log("Pesos despues de entrenar:", [w1,w2,w0]);
+		 	alert("Se entrenó la red neuronal");
+		 }
+
+		 /*
+		 * Suma-Producto de los pesos
+		 * Ewx = w*x
+		 */
+		 function sumaProductoPesos(pCaso)
+		 {
+		 	x1 = pCaso[0];
+		 	x2 = pCaso[1];
+		 	wx = (w1*x1) + (w2*x2) + (w0* umbral);
+		 	return wx;
+		 }
+
+		 /*
+		 * Determina el estado de activación actual de la neurona
+		 * f(x) = tanh(x)
+		 */
+		 function activacion(pWX)
+		 {
+		 	tanh = Math.tanh(pWX);
+
+		 	if(tanh > 0)
+		 	{
+		 		toReturn = 1;
+		 	}
+		 	else
+		 	{
+		 		toReturn = 0;
+		 	}
+
+		 	return toReturn;
+		 }
+
+		 /*
+		 * Cálculo del error con respecto a los datos esperados y obtenidos
+		 * Error = yk - Salidak
+		 */
+		 function error(pEsperado, pObtenido)
+		 {
+		 	return pEsperado - pObtenido;
+		 }
+
+		 /*
+		 * Ajusta los pesos (Incluye: Factor de Aprendizaje y Umbral)
+		 * w(j)' = w(j) + a(d-y)x(j)
+		 */
+		 function recalcularPesos(pError, pCaso)
+		 {
+		 	w1 = w1 + (fAprendizaje * pError) * (pCaso[0]);
+		 	w2 = w2 + (fAprendizaje * pError) * (pCaso[1]);
+		 	w0 = w0 + (fAprendizaje * pError) * (umbral);
+		 }
+
+		 /*
+		 * Con respecto a la RNA y sus parametros, determina la salida de 
+		 * la función con rspecto a los pesos
+		 */
+		 function probarRed()
+		 {
+		 	x1   = document.getElementById('x1').value;
+		 	x2   = document.getElementById('x2').value;
+		 	caso = [x1,x2]
+		 	wx   = sumaProductoPesos(caso);
+		 	f    = activacion(wx);
+
+		 	if(f > 0)
+		 	{
+		 		alert( "Género: Hombre");
+		 	}
+		 	else
+		 	{
+		 		alert( "Género: Mujer");
+
+		 	}
+		 }
+
+		</script>
+	</head>
+	<body>
+
+		<center>
+
+			<h2>
+				Daniel Beltrán Penagos<br>
+				Matemáticas Aplicadas - Taller No.9 Redes Neuronales
+			</h2>
+			
+			<br><br>
+
+			<table>
+				<tr>
+					<td><input style="width:100%" type="button" value="Entrenar" onclick="entrenar()"></td>
+				</tr>
+				<tr>
+					<td><input style="width:100%" type="number" placeholder="Andrógeno" id="x1" step="0.1"></td>
+				</tr>
+
+				<tr>
+					<td><input style="width:100%" type="number" placeholder="Estrógeno" id="x2" step="0.1"></td>
+				</tr>
+
+				<tr>
+					<td><input style="width:100%" type="button" value="Probar" onclick="probarRed()"></td>
+				</tr>
+			</table>
+
+			<br><br>
+
+			<!-- Tabla de Datos -->
+			<table width="100%">
+				<tr width="100%">
+					<td width="33%"></td>
+					<td width="33%">
+
+						<table id="datos" class="display" style="width:100%">
+						</table>
+
+					</td>
+					<td width="33%"></td>
+				</tr>
+			</table>
+			
+		</center>
+
+	</body>
+	</html>
